@@ -1,1 +1,63 @@
-https://script.google.com/macros/s/AKfycby9uTYZcraz5hNPM9ui33gxYoa-HdVJXRYamgtDxVEPtgTvg4jUYADQ9sJBYdhR4SR4/exec
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Step to Star Tracker</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+    .box { margin: 20px; }
+  </style>
+</head>
+<body>
+  <h1>⭐ Step to Star Tracker ⭐</h1>
+  
+  <div class="box">
+    <label>Enter steps today:</label>
+    <input type="number" id="stepsInput">
+    <button onclick="convertSteps()">Convert to Stars</button>
+  </div>
+  
+  <div class="box">
+    <h2>My Stars: <span id="stars">0</span></h2>
+  </div>
+  
+  <div class="box">
+    <button onclick="redeemReward(100)">Redeem 100-Star Reward</button>
+    <button onclick="redeemReward(200)">Redeem 200-Star Reward</button>
+    <button onclick="redeemReward(500)">Redeem 500-Star Reward</button>
+    <p id="rewardMessage"></p>
+  </div>
+  
+  <script>
+    let stars = 0;
+    function convertSteps() {
+      let steps = document.getElementById("stepsInput").value;
+      let earned = Math.floor(steps / 50); // 1 star per 50 steps
+      stars += earned;
+      document.getElementById("stars").innerText = stars;
+      
+      // Save to Google Sheet
+      saveData(steps, earned, "", stars);
+    }
+    function redeemReward(amount) {
+      if (stars >= amount) {
+        stars -= amount;
+        document.getElementById("stars").innerText = stars;
+        document.getElementById("rewardMessage").innerText = "🎉 You redeemed a " + amount + "-star reward!";
+        
+        // Save redemption to Google Sheet
+        saveData(0, 0, amount + "-star reward", stars);
+      } else {
+        document.getElementById("rewardMessage").innerText = "Not enough stars!";
+      }
+    }
+    function saveData(steps, starsEarned, reward, balance) {
+      fetch("https://script.google.com/macros/s/AKfycby9uTYZcraz5hNPM9ui33gxYoa-HdVJXRYamgtDxVEPtgTvg4jUYADQ9sJBYdhR4SR4/exec", {
+        method: "POST",
+        body: JSON.stringify({ steps: steps, stars: starsEarned, reward: reward, balance: balance })
+      })
+      .then(response => response.text())
+      .then(data => console.log(data));
+    }
+  </script>
+</body>
+</html>
