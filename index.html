@@ -29,6 +29,7 @@
   
   <script>
     let stars = 0;
+
     function convertSteps() {
       let steps = document.getElementById("stepsInput").value;
       let earned = Math.floor(steps / 50); // 1 star per 50 steps
@@ -38,6 +39,7 @@
       // Save to Google Sheet
       saveData(steps, earned, "", stars);
     }
+
     function redeemReward(amount) {
       if (stars >= amount) {
         stars -= amount;
@@ -50,6 +52,7 @@
         document.getElementById("rewardMessage").innerText = "Not enough stars!";
       }
     }
+
     function saveData(steps, starsEarned, reward, balance) {
       fetch("https://script.google.com/macros/s/AKfycbzhRUtE_mbW4PVxxEFpkV24yKA91BtvjGoZW_EggfHd8izZcd7rveiAO9Mjvt6nnhx5/exec", {
         method: "POST",
