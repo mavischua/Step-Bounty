@@ -12,10 +12,13 @@
     let stepsLog = document.getElementById("stepsLog");
     stepsLog.innerHTML = "";
 
-    if (!Array.isArray(data) || data.length === 0) {
+    if (!Array.isArray(data) || data.length <= 1) {
       stepsLog.innerHTML = "<p>No step history found.</p>";
       return;
     }
+
+    // ✅ skip the first row (header row)
+    const rows = data.slice(1);
 
     let table = document.createElement("table");
     let header = document.createElement("tr");
@@ -25,11 +28,8 @@
     let totalSteps = 0;
     let totalStars = 0;
 
-    // skip the first row if it's the header
-    const rows = data.filter(r => r.date !== "Date ");
-
     // track latest balance from the last row
-    let latestBalance = rows.length > 0 ? parseInt(rows[rows.length - 1].balance || 0) : 0;
+    let latestBalance = parseInt(rows[rows.length - 1].balance || 0);
 
     const grouped = {};
     rows.forEach(row => {
