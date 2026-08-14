@@ -109,6 +109,7 @@
   
   <div id="stepsHistory">
     <h3>🚶 Steps History (This Month)</h3>
+    <!-- ✅ These must exist -->
     <div id="stepsLog"></div>
     <p id="stepsTotal">Total: 0 steps</p>
   </div>
@@ -118,6 +119,7 @@
 
     function addHistory(message) {
       let log = document.getElementById("historyLog");
+      if (!log) return;
       let entry = document.createElement("p");
       entry.textContent = message;
       log.prepend(entry);
@@ -133,8 +135,7 @@
         return;
       }
 
-      // skip header row
-      const rows = data.slice(1);
+      const rows = data.slice(1); // skip header row
 
       let table = document.createElement("table");
       let header = document.createElement("tr");
@@ -143,16 +144,13 @@
 
       let totalSteps = 0;
       let totalStars = 0;
-
-      // latest balance from last row
       let latestBalance = parseInt(rows[rows.length - 1].balance || 0);
 
       rows.forEach(row => {
         let date = row.date;
         if (date && date.includes("T")) {
-          date = date.split("T")[0]; // strip time
+          date = date.split("T")[0];
         }
-
         const steps = parseInt(row.steps || 0);
         const starsEarned = parseInt(row.stars || 0);
         const reward = row.reward || "";
@@ -173,7 +171,6 @@
       stepsLog.appendChild(table);
       document.getElementById("stepsTotal").textContent = `Total: ${totalSteps} steps, ${totalStars} stars earned`;
 
-      // update star balance box
       document.getElementById("stars").innerText = latestBalance;
       stars = latestBalance;
     }
@@ -191,9 +188,7 @@
       let earned = Math.floor(steps / 50);
       stars += earned;
       document.getElementById("stars").innerText = stars;
-      
       addHistory(`+${earned} stars from ${steps} steps on ${date}`);
-      
       saveData(date, steps, earned, "", stars);
       loadStepsHistory();
     }
@@ -204,9 +199,7 @@
         stars -= amount;
         document.getElementById("stars").innerText = stars;
         document.getElementById("rewardMessage").innerText = "🎉 You redeemed a " + amount + "-star reward!";
-        
         addHistory(`-${amount} stars redeemed on ${date}`);
-        
         saveData(date, 0, 0, amount + "-star reward", stars);
         loadStepsHistory();
       } else {
@@ -220,8 +213,3 @@
         body: JSON.stringify({ date: date, steps: steps, stars: starsEarned, reward: reward, balance: balance })
       })
       .then(response => response.text())
-      .then(data => console.log(data));
-    }
-
-    window.onload = loadStepsHistory;
-  </script
