@@ -10,21 +10,25 @@
 <body>
   <h1>⭐ Step to Star Tracker ⭐</h1>
   
+  <!-- Date picker -->
   <div class="box">
     <label>Select date:</label>
     <input type="date" id="dateInput">
   </div>
   
+  <!-- Steps input -->
   <div class="box">
     <label>Enter steps:</label>
     <input type="number" id="stepsInput">
     <button onclick="convertSteps()">Convert to Stars</button>
   </div>
   
+  <!-- Stars display -->
   <div class="box">
     <h2>My Stars: <span id="stars">0</span></h2>
   </div>
   
+  <!-- Rewards -->
   <div class="box">
     <button onclick="redeemReward(100)">Redeem 100-Star Reward</button>
     <button onclick="redeemReward(200)">Redeem 200-Star Reward</button>
