@@ -100,8 +100,15 @@
 
       // skip header row
       const rows = data.slice(1);
-      // latest balance from last row
-      let latestBalance = parseInt(rows[rows.length - 1].balance || 0);
+
+      // ✅ get balance from the last non-empty row
+      let latestBalance = 0;
+      for (let i = rows.length - 1; i >= 0; i--) {
+        if (rows[i].balance && rows[i].balance !== "Star balance ") {
+          latestBalance = parseInt(rows[i].balance);
+          break;
+        }
+      }
 
       starsBox.innerText = latestBalance;
       stars = latestBalance;
