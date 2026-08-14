@@ -106,7 +106,7 @@
     }
 
     function loadStepsHistory() {
-      fetch("https://script.google.com/macros/s/AKfycbyq8V68VAk2I3uSXk5wvTj8sxC-PHnpV5C2sIsxqmq2FcxGRAKtxSv9VR6Ew7mqgNY3/exec")
+      fetch("https://script.google.com/macros/s/AKfycbxslnBBUyS61HPGg7IXIKMFCVeDO9Rj3DE-Yv4KcnxqlDt_Y0u9U21CQYelyTtA6mF7/exec")
         .then(response => response.json())
         .then(data => updateStepsHistory(data));
     }
@@ -141,7 +141,7 @@
     }
 
     function saveData(date, steps, starsEarned, reward, balance) {
-      fetch("https://script.google.com/macros/s/AKfycbyq8V68VAk2I3uSXk5wvTj8sxC-PHnpV5C2sIsxqmq2FcxGRAKtxSv9VR6Ew7mqgNY3/exec", {
+      fetch("https://script.google.com/macros/s/AKfycbxslnBBUyS61HPGg7IXIKMFCVeDO9Rj3DE-Yv4KcnxqlDt_Y0u9U21CQYelyTtA6mF7/exec", {
         method: "POST",
         body: JSON.stringify({ date: date, steps: steps, stars: starsEarned, reward: reward, balance: balance })
       })
