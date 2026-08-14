@@ -118,6 +118,7 @@
       let month = new Date().toISOString().slice(0,7); // YYYY-MM
 
       data.forEach(row => {
+        if (!row.date) return; // skip empty rows
         let entryMonth = String(row.date).slice(0,7);
         if (entryMonth === month) {
           let shortDate = String(row.date).split("T")[0]; // remove time if present
