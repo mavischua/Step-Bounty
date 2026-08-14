@@ -14,7 +14,7 @@
       border-radius: 8px;
       width: 250px;
     }
-    #history {
+    #history, #stepsHistory {
       margin-top: 20px;
       text-align: left;
       max-width: 400px;
@@ -23,9 +23,13 @@
       border-top: 1px solid #ccc;
       padding-top: 10px;
     }
-    #history p {
+    #history p, #stepsHistory p {
       margin: 5px 0;
       font-size: 14px;
+    }
+    #stepsTotal {
+      font-weight: bold;
+      margin-top: 10px;
     }
   </style>
 </head>
@@ -61,18 +65,46 @@
   
   <!-- History log -->
   <div id="history">
-    <h3>📜 History</h3>
+    <h3>📜 Star History</h3>
     <div id="historyLog"></div>
+  </div>
+  
+  <!-- Steps history -->
+  <div id="stepsHistory">
+    <h3>🚶 Steps History (This Month)</h3>
+    <div id="stepsLog"></div>
+    <p id="stepsTotal">Total: 0 steps</p>
   </div>
   
   <script>
     let stars = 0;
+    let monthlySteps = [];
 
     function addHistory(message) {
       let log = document.getElementById("historyLog");
       let entry = document.createElement("p");
       entry.textContent = message;
       log.prepend(entry); // newest entry at top
+    }
+
+    function addStepsHistory(date, steps) {
+      let stepsLog = document.getElementById("stepsLog");
+      let entry = document.createElement("p");
+      entry.textContent = `${date}: ${steps} steps`;
+      stepsLog.prepend(entry);
+
+      // Track steps for this month
+      let month = new Date().toISOString().slice(0,7); // YYYY-MM
+      let entryMonth = date.slice(0,7);
+      if (entryMonth === month) {
+        monthlySteps.push(parseInt(steps));
+      }
+      updateStepsTotal();
+    }
+
+    function updateStepsTotal() {
+      let total = monthlySteps.reduce((a,b) => a+b, 0);
+      document.getElementById("stepsTotal").textContent = `Total: ${total} steps`;
     }
 
     function convertSteps() {
@@ -83,6 +115,7 @@
       document.getElementById("stars").innerText = stars;
       
       addHistory(`+${earned} stars from ${steps} steps on ${date}`);
+      addStepsHistory(date, steps);
       
       // Save to Google Sheet
       saveData(date, steps, earned, "", stars);
