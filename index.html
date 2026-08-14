@@ -127,6 +127,11 @@
       let stepsLog = document.getElementById("stepsLog");
       stepsLog.innerHTML = "";
 
+      if (!Array.isArray(data) || data.length === 0) {
+        stepsLog.innerHTML = "<p>No step history found.</p>";
+        return;
+      }
+
       let table = document.createElement("table");
       let header = document.createElement("tr");
       header.innerHTML = "<th>Date</th><th>Steps</th><th>Stars Earned</th><th>Reward</th>";
@@ -142,7 +147,7 @@
         const starsEarned = parseInt(row.stars || 0);
         const reward = row.reward || "";
 
-        if (date) {
+        if (date && date !== "Date ") { // skip header row accidentally included
           if (!grouped[date]) {
             grouped[date] = { steps: 0, stars: 0, rewards: [] };
           }
@@ -171,7 +176,7 @@
     }
 
     function loadStepsHistory() {
-      fetch("https://script.google.com/macros/s/AKfycby9eV5PIZOxtCToH-0LpfOPzn0UTTw9X6Ce7giP-sssrDaIWoLE1V2O8qbVYRIGBgh0/exec")
+      fetch("https://script.google.com/macros/s/AKfycbxxDgztKv_DXSLBtJGksfxoyvykHB5SyCblq7QYmUZdzfmOHZAAROBgpWdvwvrkzeny/exec")
         .then(response => response.json())
         .then(data => updateStepsHistory(data))
         .catch(err => console.error("Error loading steps:", err));
@@ -207,6 +212,15 @@
     }
 
     function saveData(date, steps, starsEarned, reward, balance) {
-      fetch("https://script.google.com/macros/s/AKfycby9eV5PIZOxtCToH-0LpfOPzn0UTTw9X6Ce7giP-sssrDaIWoLE1V2O8qbVYRIGBgh0/exec", {
+      fetch("https://script.google.com/macros/s/AKfycbxxDgztKv_DXSLBtJGksfxoyvykHB5SyCblq7QYmUZdzfmOHZAAROBgpWdvwvrkzeny/exec", {
         method: "POST",
-        body: JSON.stringify({ date: date
+        body: JSON.stringify({ date: date, steps: steps, stars: starsEarned, reward: reward, balance: balance })
+      })
+      .then(response => response.text())
+      .then(data => console.log(data));
+    }
+
+    window.onload = loadStepsHistory;
+  </script>
+</body>
+</html>
