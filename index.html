@@ -23,32 +23,28 @@
       border-top: 1px solid #ccc;
       padding-top: 10px;
     }
-    #history p {
-      margin: 5px 0;
-      font-size: 14px;
+    #history p { margin: 5px 0; font-size: 14px; }
+    #stepsTotal { font-weight: bold; margin-top: 10px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+    th { background-color: #eee; }
+    tr:nth-child(even) { background-color: #ffe6f0; } /* pastel pink */
+    tr:nth-child(odd) { background-color: #e6f0ff; } /* pastel blue */
+    .reward-images {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 15px;
     }
-    #stepsTotal {
-      font-weight: bold;
-      margin-top: 10px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-    }
-    th, td {
+    .reward-images div { text-align: center; width: 120px; }
+    .reward-images img {
+      width: 80px; height: 80px;
+      object-fit: contain;
+      border-radius: 8px;
       border: 1px solid #ccc;
-      padding: 8px;
-      text-align: center;
-    }
-    th {
-      background-color: #eee;
-    }
-    tr:nth-child(even) {
-      background-color: #ffe6f0; /* pastel pink */
-    }
-    tr:nth-child(odd) {
-      background-color: #e6f0ff; /* pastel blue */
+      background-color: #fff;
+      padding: 5px;
     }
   </style>
 </head>
@@ -74,10 +70,36 @@
     <p id="stars">0</p>
   </div>
   
+  <!-- Reward images -->
+  <div class="reward-images">
+    <div>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/4/4f/Stationery.jpg" alt="Stationery">
+      <p>100 ⭐ Stationery</p>
+    </div>
+    <div>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/7/70/Chocolate_%28blue_background%29.jpg" alt="Chocolate">
+      <p>200 ⭐ Chocolate</p>
+    </div>
+    <div>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Bubble_tea_with_black_tapioca.jpg" alt="Milk Tea">
+      <p>300 ⭐ Milk Tea</p>
+    </div>
+    <div>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/6/6f/Dessert_platter.jpg" alt="Dessert">
+      <p>400 ⭐ Dessert</p>
+    </div>
+    <div>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/3/3f/Mala_Xiang_Guo.jpg" alt="Mala Xiang Guo">
+      <p>500 ⭐ Mala Xiang Guo</p>
+    </div>
+  </div>
+  
   <!-- Rewards -->
   <div class="box">
     <button onclick="redeemReward(100)">Redeem 100-Star Reward</button>
     <button onclick="redeemReward(200)">Redeem 200-Star Reward</button>
+    <button onclick="redeemReward(300)">Redeem 300-Star Reward</button>
+    <button onclick="redeemReward(400)">Redeem 400-Star Reward</button>
     <button onclick="redeemReward(500)">Redeem 500-Star Reward</button>
     <p id="rewardMessage"></p>
   </div>
@@ -118,10 +140,10 @@
       let month = new Date().toISOString().slice(0,7); // YYYY-MM
 
       data.forEach(row => {
-        if (!row.date) return; // skip empty rows
+        if (!row.date) return;
         let entryMonth = String(row.date).slice(0,7);
         if (entryMonth === month) {
-          let shortDate = String(row.date).split("T")[0]; // remove time if present
+          let shortDate = String(row.date).split("T")[0];
           let tr = document.createElement("tr");
           tr.innerHTML = `<td>${shortDate}</td><td>${row.steps}</td>`;
           table.appendChild(tr);
