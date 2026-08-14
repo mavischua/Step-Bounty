@@ -1,90 +1,444 @@
-<script>
-  let stars = 0;
+<!DOCTYPE html>
+<html>
+<head>
+  <title>⭐ Step to Star Tracker ⭐</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin-top: 30px; }
+    .box { margin: 20px; }
+    .balance-box {
+      border: 2px solid #444;
+      display: inline-block;
+      padding: 15px;
+      margin-top: 20px;
+      background-color: #f9f9f9;
+      border-radius: 8px;
+      width: 250px;
+      margin-bottom: 30px;
+    }
+    #history, #stepsHistory {
+      margin-top: 20px;
+      text-align: left;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      border-top: 1px solid #ccc;
+      padding-top: 10px;
+    }
+    #history p { margin: 5px 0; font-size: 14px; }
+    #stepsTotal { font-weight: bold; margin-top: 10px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+    th { background-color: #eee; }
+    tr:nth-child(even) { background-color: #ffe6f0; }
+    tr:nth-child(odd) { background-color: #e6f0ff; }
+    .reward-grid {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 15px;
+    }
+    .reward-box {
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      width: 120px;
+      padding: 15px;
+      background-color: #fdfdfd;
+      cursor: pointer;
+      transition: transform 0.2s, background-color 0.2s;
+    }
+    .reward-box:hover {
+      transform: scale(1.05);
+      background-color: #f0f8ff;
+    }
+    .reward-box .emoji {
+      font-size: 30px;
+      margin-bottom: 8px;
+    }
+    .reward-box p { margin: 0; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <h1>⭐ Step to Star Tracker ⭐</h1>
+  
+  <div class="box">
+    <label>Select date:</label>
+    <input type="date" id="dateInput">
+  </div>
+  
+  <div class="box">
+    <label>Enter steps:</label>
+    <input type="number" id="stepsInput">
+    <button onclick="convertSteps()">Convert to Stars</button>
+  </div>
+  
+  <div class="balance-box">
+    <h2>🌟 Star Balance</h2>
+    <p id="stars">0</p>
+  </div>
+  
+  <div class="reward-grid">
+    <div class="reward-box" onclick="redeemReward(100)">
+      <div class="emoji">✏️</div>
+      <p>100 ⭐ Stationery</p>
+    </div>
+    <div class="reward-box" onclick="redeemReward(200)">
+      <div class="emoji">🍫</div>
+      <p>200 ⭐ Chocolate</p>
+    </div>
+    <div class="reward-box" onclick="redeemReward(300)">
+      <div class="emoji">🧋</div>
+      <p>300 ⭐ Milk Tea</p>
+    </div>
+    <div class="reward-box" onclick="redeemReward(400)">
+      <div class="emoji">🍰</div>
+      <p>400 ⭐ Dessert</p>
+    </div>
+    <div class="reward-box" onclick="redeemReward(500)">
+      <div class="emoji">🍲</div>
+      <p>500 ⭐ Mala Xiang Guo</p>
+    </div>
+  </div>
+  
+  <p id="rewardMessage"></p>
+  
+  <div id="history">
+    <h3>📜 Star History</h3>
+    <div id="historyLog"></div>
+  </div>
+  
+  <div id="stepsHistory">
+    <h3>🚶 Steps History (This Month)</h3>
+    <div id="stepsLog"></div>
+    <p id="stepsTotal">Total: 0 steps</p>
+  </div>
+  
+  <script>
+    let stars = 0;
 
-  function addHistory(message) {
-    let log = document.getElementById("historyLog");
-    let entry = document.createElement("p");
-    entry.textContent = message;
-    log.prepend(entry);
-  }
+    function addHistory(message) {
+      let log = document.getElementById("historyLog");
+      let entry = document.createElement("p");
+      entry.textContent = message;
+      log.prepend(entry);
+    }
 
-  function updateStepsHistory(data) {
-    let stepsLog = document.getElementById("stepsLog");
-    stepsLog.innerHTML = "";
+    function updateStepsHistory(data) {
+      let stepsLog = document.getElementById("stepsLog");
+      stepsLog.innerHTML = "";
 
-    let table = document.createElement("table");
-    let header = document.createElement("tr");
-    header.innerHTML = "<th>Date</th><th>Steps</th>";
-    table.appendChild(header);
+      let table = document.createElement("table");
+      let header = document.createElement("tr");
+      header.innerHTML = "<th>Date</th><th>Steps</th><th>Stars Earned</th><th>Reward</th>";
+      table.appendChild(header);
 
-    let totalSteps = 0;
+      let totalSteps = 0;
+      let totalStars = 0;
 
-    // Group steps by date
-    const stepsByDate = {};
-    data.forEach(row => {
-      const date = row.date;
-      const steps = parseInt(row.steps || 0);
-      if (date && steps > 0) {
-        if (!stepsByDate[date]) stepsByDate[date] = 0;
-        stepsByDate[date] += steps;
+      // Group by date
+      const grouped = {};
+      data.forEach(row => {
+        const date = row.date;
+        const steps = parseInt(row.steps || 0);
+        const starsEarned = parseInt(row.stars || 0);
+        const reward = row.reward || "";
+
+        if (date) {
+          if (!grouped[date]) {
+            grouped[date] = { steps: 0, stars: 0, rewards: [] };
+          }
+          grouped[date].steps += steps;
+          grouped[date].stars += starsEarned;
+          if (reward) grouped[date].rewards.push(reward);
+        }
+      });
+
+      // Render grouped rows
+      for (const date in grouped) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${date}</td>
+          <td>${grouped[date].steps}</td>
+          <td>${grouped[date].stars}</td>
+          <td>${grouped[date].rewards.join(", ")}</td>
+        `;
+        table.appendChild(tr);
+
+        totalSteps += grouped[date].steps;
+        totalStars += grouped[date].stars;
       }
-    });
 
-    // Render grouped rows
-    for (const date in stepsByDate) {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `<td>${date}</td><td>${stepsByDate[date]}</td>`;
-      table.appendChild(tr);
-      totalSteps += stepsByDate[date];
+      stepsLog.appendChild(table);
+      document.getElementById("stepsTotal").textContent = `Total: ${totalSteps} steps, ${totalStars} stars earned`;
     }
 
-    stepsLog.appendChild(table);
-    document.getElementById("stepsTotal").textContent = `Total: ${totalSteps} steps`;
-  }
+    function loadStepsHistory() {
+      fetch("https://script.google.com/macros/s/AKfycby9eV5PIZOxtCToH-0LpfOPzn0UTTw9X6Ce7giP-sssrDaIWoLE1V2O8qbVYRIGBgh0/exec")
+        .then(response => response.json())
+        .then(data => updateStepsHistory(data));
+    }
 
-  function loadStepsHistory() {
-    fetch("https://script.google.com/macros/s/AKfycbwey1lg1Hg2wDTgb5iiT0n1UtR1_F7Xw5y3OLZlWgAO7YmZ3psuSjgmzcsmncmWjP6Q/exec")
-      .then(response => response.json())
-      .then(data => updateStepsHistory(data));
-  }
-
-  function convertSteps() {
-    let steps = document.getElementById("stepsInput").value;
-    let date = document.getElementById("dateInput").value || new Date().toISOString().split("T")[0];
-    let earned = Math.floor(steps / 50);
-    stars += earned;
-    document.getElementById("stars").innerText = stars;
-    
-    addHistory(`+${earned} stars from ${steps} steps on ${date}`);
-    
-    saveData(date, steps, earned, "", stars);
-    loadStepsHistory();
-  }
-
-  function redeemReward(amount) {
-    let date = document.getElementById("dateInput").value || new Date().toISOString().split("T")[0];
-    if (stars >= amount) {
-      stars -= amount;
+    function convertSteps() {
+      let steps = document.getElementById("stepsInput").value;
+      let date = document.getElementById("dateInput").value || new Date().toISOString().split("T")[0];
+      let earned = Math.floor(steps / 50);
+      stars += earned;
       document.getElementById("stars").innerText = stars;
-      document.getElementById("rewardMessage").innerText = "🎉 You redeemed a " + amount + "-star reward!";
       
-      addHistory(`-${amount} stars redeemed on ${date}`);
+      addHistory(`+${earned} stars from ${steps} steps on ${date}`);
       
-      saveData(date, 0, 0, amount + "-star reward", stars);
+      saveData(date, steps, earned, "", stars);
       loadStepsHistory();
-    } else {
-      document.getElementById("rewardMessage").innerText = "Not enough stars!";
     }
-  }
 
-  function saveData(date, steps, starsEarned, reward, balance) {
-    fetch("https://script.google.com/macros/s/AKfycbwey1lg1Hg2wDTgb5iiT0n1UtR1_F7Xw5y3OLZlWgAO7YmZ3psuSjgmzcsmncmWjP6Q/exec", {
-      method: "POST",
-      body: JSON.stringify({ date: date, steps: steps, stars: starsEarned, reward: reward, balance: balance })
-    })
-    .then(response => response.text())
-    .then(data => console.log(data));
-  }
+    function redeemReward(amount) {
+      let date = document.getElementById("dateInput").value || new Date().toISOString().split("T")[0];
+      if (stars >= amount) {
+        stars -= amount;
+        document.getElementById("stars").innerText = stars;
+        document.getElementById("rewardMessage").innerText = "🎉 You redeemed a " + amount + "-star reward!";
+        
+        addHistory(`-${amount} stars redeemed on ${date}`);
+        
+        saveData(date, 0, 0, amount + "-star reward", stars);
+        loadStepsHistory();
+      } else {
+        document.getElementById("rewardMessage").innerText = "Not enough stars!";
+      }
+    }
 
-  window.onload = loadStepsHistory;
-</script>
+    function saveData(date, steps, starsEarned, reward, balance) {
+      fetch("https://script.google.com/macros/s/AKfycby9eV5PIZOxtCToH-0LpfOPzn0UTTw9X6Ce7giP-sssrDaIWoLE1V2O8qbVYRIGBgh0/exec", {
+        method: "POST",
+        body: JSON.stringify({ date: date, steps: steps, stars: starsEarned, reward: reward, balance: balance })
+      })
+      .then(response => response.text())
+      .then(data => console.log(data));
+    }
+
+    window.onload = loadStepsHistory;
+  </script>
+</body>
+</html>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>⭐ Step to Star Tracker ⭐</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin-top: 30px; }
+    .box { margin: 20px; }
+    .balance-box {
+      border: 2px solid #444;
+      display: inline-block;
+      padding: 15px;
+      margin-top: 20px;
+      background-color: #f9f9f9;
+      border-radius: 8px;
+      width: 250px;
+      margin-bottom: 30px;
+    }
+    #history, #stepsHistory {
+      margin-top: 20px;
+      text-align: left;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      border-top: 1px solid #ccc;
+      padding-top: 10px;
+    }
+    #history p { margin: 5px 0; font-size: 14px; }
+    #stepsTotal { font-weight: bold; margin-top: 10px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+    th { background-color: #eee; }
+    tr:nth-child(even) { background-color: #ffe6f0; }
+    tr:nth-child(odd) { background-color: #e6f0ff; }
+    .reward-grid {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 15px;
+    }
+    .reward-box {
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      width: 120px;
+      padding: 15px;
+      background-color: #fdfdfd;
+      cursor: pointer;
+      transition: transform 0.2s, background-color 0.2s;
+    }
+    .reward-box:hover {
+      transform: scale(1.05);
+      background-color: #f0f8ff;
+    }
+    .reward-box .emoji {
+      font-size: 30px;
+      margin-bottom: 8px;
+    }
+    .reward-box p { margin: 0; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <h1>⭐ Step to Star Tracker ⭐</h1>
+  
+  <div class="box">
+    <label>Select date:</label>
+    <input type="date" id="dateInput">
+  </div>
+  
+  <div class="box">
+    <label>Enter steps:</label>
+    <input type="number" id="stepsInput">
+    <button onclick="convertSteps()">Convert to Stars</button>
+  </div>
+  
+  <div class="balance-box">
+    <h2>🌟 Star Balance</h2>
+    <p id="stars">0</p>
+  </div>
+  
+  <div class="reward-grid">
+    <div class="reward-box" onclick="redeemReward(100)">
+      <div class="emoji">✏️</div>
+      <p>100 ⭐ Stationery</p>
+    </div>
+    <div class="reward-box" onclick="redeemReward(200)">
+      <div class="emoji">🍫</div>
+      <p>200 ⭐ Chocolate</p>
+    </div>
+    <div class="reward-box" onclick="redeemReward(300)">
+      <div class="emoji">🧋</div>
+      <p>300 ⭐ Milk Tea</p>
+    </div>
+    <div class="reward-box" onclick="redeemReward(400)">
+      <div class="emoji">🍰</div>
+      <p>400 ⭐ Dessert</p>
+    </div>
+    <div class="reward-box" onclick="redeemReward(500)">
+      <div class="emoji">🍲</div>
+      <p>500 ⭐ Mala Xiang Guo</p>
+    </div>
+  </div>
+  
+  <p id="rewardMessage"></p>
+  
+  <div id="history">
+    <h3>📜 Star History</h3>
+    <div id="historyLog"></div>
+  </div>
+  
+  <div id="stepsHistory">
+    <h3>🚶 Steps History (This Month)</h3>
+    <div id="stepsLog"></div>
+    <p id="stepsTotal">Total: 0 steps</p>
+  </div>
+  
+  <script>
+    let stars = 0;
+
+    function addHistory(message) {
+      let log = document.getElementById("historyLog");
+      let entry = document.createElement("p");
+      entry.textContent = message;
+      log.prepend(entry);
+    }
+
+    function updateStepsHistory(data) {
+      let stepsLog = document.getElementById("stepsLog");
+      stepsLog.innerHTML = "";
+
+      let table = document.createElement("table");
+      let header = document.createElement("tr");
+      header.innerHTML = "<th>Date</th><th>Steps</th><th>Stars Earned</th><th>Reward</th>";
+      table.appendChild(header);
+
+      let totalSteps = 0;
+      let totalStars = 0;
+
+      // Group by date
+      const grouped = {};
+      data.forEach(row => {
+        const date = row.date;
+        const steps = parseInt(row.steps || 0);
+        const starsEarned = parseInt(row.stars || 0);
+        const reward = row.reward || "";
+
+        if (date) {
+          if (!grouped[date]) {
+            grouped[date] = { steps: 0, stars: 0, rewards: [] };
+          }
+          grouped[date].steps += steps;
+          grouped[date].stars += starsEarned;
+          if (reward) grouped[date].rewards.push(reward);
+        }
+      });
+
+      // Render grouped rows
+      for (const date in grouped) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${date}</td>
+          <td>${grouped[date].steps}</td>
+          <td>${grouped[date].stars}</td>
+          <td>${grouped[date].rewards.join(", ")}</td>
+        `;
+        table.appendChild(tr);
+
+        totalSteps += grouped[date].steps;
+        totalStars += grouped[date].stars;
+      }
+
+      stepsLog.appendChild(table);
+      document.getElementById("stepsTotal").textContent = `Total: ${totalSteps} steps, ${totalStars} stars earned`;
+    }
+
+    function loadStepsHistory() {
+      fetch("https://script.google.com/macros/s/AKfycby9eV5PIZOxtCToH-0LpfOPzn0UTTw9X6Ce7giP-sssrDaIWoLE1V2O8qbVYRIGBgh0/exec")
+        .then(response => response.json())
+        .then(data => updateStepsHistory(data));
+    }
+
+    function convertSteps() {
+      let steps = document.getElementById("stepsInput").value;
+      let date = document.getElementById("dateInput").value || new Date().toISOString().split("T")[0];
+      let earned = Math.floor(steps / 50);
+      stars += earned;
+      document.getElementById("stars").innerText = stars;
+      
+      addHistory(`+${earned} stars from ${steps} steps on ${date}`);
+      
+      saveData(date, steps, earned, "", stars);
+      loadStepsHistory();
+    }
+
+    function redeemReward(amount) {
+      let date = document.getElementById("dateInput").value || new Date().toISOString().split("T")[0];
+      if (stars >= amount) {
+        stars -= amount;
+        document.getElementById("stars").innerText = stars;
+        document.getElementById("rewardMessage").innerText = "🎉 You redeemed a " + amount + "-star reward!";
+        
+        addHistory(`-${amount} stars redeemed on ${date}`);
+        
+        saveData(date, 0, 0, amount + "-star reward", stars);
+        loadStepsHistory();
+      } else {
+        document.getElementById("rewardMessage").innerText = "Not enough stars!";
+      }
+    }
+
+    function saveData(date, steps, starsEarned, reward, balance) {
+      fetch("https://script.google.com/macros/s/AKfycby9eV5PIZOxtCToH-0LpfOPzn0UTTw9X6Ce7giP-sssrDaIWoLE1V2O8qbVYRIGBgh0/exec", {
+        method: "POST",
+        body: JSON.stringify({ date: date, steps: steps, stars: starsEarned, reward: reward, balance: balance })
+      })
+      .then(response => response.text())
+      .then(data => console.log(data));
+    }
+
+    window.onload = loadStepsHistory;
+  </script>
+</body>
+</html>
