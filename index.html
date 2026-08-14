@@ -11,7 +11,12 @@
   <h1>⭐ Step to Star Tracker ⭐</h1>
   
   <div class="box">
-    <label>Enter steps today:</label>
+    <label>Select date:</label>
+    <input type="date" id="dateInput">
+  </div>
+  
+  <div class="box">
+    <label>Enter steps:</label>
     <input type="number" id="stepsInput">
     <button onclick="convertSteps()">Convert to Stars</button>
   </div>
@@ -32,31 +37,33 @@
 
     function convertSteps() {
       let steps = document.getElementById("stepsInput").value;
+      let date = document.getElementById("dateInput").value || new Date().toISOString().split("T")[0];
       let earned = Math.floor(steps / 50); // 1 star per 50 steps
       stars += earned;
       document.getElementById("stars").innerText = stars;
       
       // Save to Google Sheet
-      saveData(steps, earned, "", stars);
+      saveData(date, steps, earned, "", stars);
     }
 
     function redeemReward(amount) {
+      let date = document.getElementById("dateInput").value || new Date().toISOString().split("T")[0];
       if (stars >= amount) {
         stars -= amount;
         document.getElementById("stars").innerText = stars;
         document.getElementById("rewardMessage").innerText = "🎉 You redeemed a " + amount + "-star reward!";
         
         // Save redemption to Google Sheet
-        saveData(0, 0, amount + "-star reward", stars);
+        saveData(date, 0, 0, amount + "-star reward", stars);
       } else {
         document.getElementById("rewardMessage").innerText = "Not enough stars!";
       }
     }
 
-    function saveData(steps, starsEarned, reward, balance) {
-      fetch("https://script.google.com/macros/s/AKfycbzhRUtE_mbW4PVxxEFpkV24yKA91BtvjGoZW_EggfHd8izZcd7rveiAO9Mjvt6nnhx5/exec", {
+    function saveData(date, steps, starsEarned, reward, balance) {
+      fetch("https://script.google.com/macros/s/AKfycbz_MBVLDBSJ1uJWwWO_YEAlSjTx7uzPOS0YLq0nu9Azmn53HFhQdqoAqQ1IpPXaMDwA/exec", {
         method: "POST",
-        body: JSON.stringify({ steps: steps, stars: starsEarned, reward: reward, balance: balance })
+        body: JSON.stringify({ date: date, steps: steps, stars: starsEarned, reward: reward, balance: balance })
       })
       .then(response => response.text())
       .then(data => console.log(data));
