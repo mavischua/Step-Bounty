@@ -78,47 +78,50 @@
   
   <script>
     let stars = 0;
-    let monthlySteps = [];
 
     function addHistory(message) {
       let log = document.getElementById("historyLog");
       let entry = document.createElement("p");
       entry.textContent = message;
-      log.prepend(entry); // newest entry at top
+      log.prepend(entry);
     }
 
-    function addStepsHistory(date, steps) {
+    function updateStepsHistory(data) {
       let stepsLog = document.getElementById("stepsLog");
-      let entry = document.createElement("p");
-      entry.textContent = `${date}: ${steps} steps`;
-      stepsLog.prepend(entry);
-
-      // Track steps for this month
+      stepsLog.innerHTML = "";
+      let total = 0;
       let month = new Date().toISOString().slice(0,7); // YYYY-MM
-      let entryMonth = date.slice(0,7);
-      if (entryMonth === month) {
-        monthlySteps.push(parseInt(steps));
-      }
-      updateStepsTotal();
+
+      data.forEach(row => {
+        let entryMonth = String(row.date).slice(0,7);
+        if (entryMonth === month) {
+          let entry = document.createElement("p");
+          entry.textContent = `${row.date}: ${row.steps} steps`;
+          stepsLog.prepend(entry);
+          total += parseInt(row.steps || 0);
+        }
+      });
+
+      document.getElementById("stepsTotal").textContent = `Total: ${total} steps`;
     }
 
-    function updateStepsTotal() {
-      let total = monthlySteps.reduce((a,b) => a+b, 0);
-      document.getElementById("stepsTotal").textContent = `Total: ${total} steps`;
+    function loadStepsHistory() {
+      fetch("https://script.google.com/macros/s/AKfycbwmSACthob7vq_YfsohgPZKBh4qwbI0xUVkR8sAly3jtTlZoW0Gez0MZiSx1BEa5Y4N/exec")
+        .then(response => response.json())
+        .then(data => updateStepsHistory(data));
     }
 
     function convertSteps() {
       let steps = document.getElementById("stepsInput").value;
       let date = document.getElementById("dateInput").value || new Date().toISOString().split("T")[0];
-      let earned = Math.floor(steps / 50); // 1 star per 50 steps
+      let earned = Math.floor(steps / 50);
       stars += earned;
       document.getElementById("stars").innerText = stars;
       
       addHistory(`+${earned} stars from ${steps} steps on ${date}`);
-      addStepsHistory(date, steps);
       
-      // Save to Google Sheet
       saveData(date, steps, earned, "", stars);
+      loadStepsHistory();
     }
 
     function redeemReward(amount) {
@@ -130,21 +133,23 @@
         
         addHistory(`-${amount} stars redeemed on ${date}`);
         
-        // Save redemption to Google Sheet
         saveData(date, 0, 0, amount + "-star reward", stars);
+        loadStepsHistory();
       } else {
         document.getElementById("rewardMessage").innerText = "Not enough stars!";
       }
     }
 
     function saveData(date, steps, starsEarned, reward, balance) {
-      fetch("https://script.google.com/macros/s/AKfycbz_MBVLDBSJ1uJWwWO_YEAlSjTx7uzPOS0YLq0nu9Azmn53HFhQdqoAqQ1IpPXaMDwA/exec", {
+      fetch("https://script.google.com/macros/s/AKfycbwmSACthob7vq_YfsohgPZKBh4qwbI0xUVkR8sAly3jtTlZoW0Gez0MZiSx1BEa5Y4N/exec", {
         method: "POST",
         body: JSON.stringify({ date: date, steps: steps, stars: starsEarned, reward: reward, balance: balance })
       })
       .then(response => response.text())
       .then(data => console.log(data));
     }
+
+    window.onload = loadStepsHistory;
   </script>
 </body>
 </html>
