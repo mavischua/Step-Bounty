@@ -55,10 +55,7 @@
       font-size: 30px;
       margin-bottom: 8px;
     }
-    .reward-box p {
-      margin: 0;
-      font-size: 14px;
-    }
+    .reward-box p { margin: 0; font-size: 14px; }
   </style>
 </head>
 <body>
@@ -141,19 +138,19 @@
       let month = new Date().toISOString().slice(0,7);
 
       data.forEach(row => {
-        if (!row.date) return;
-        let entryMonth = String(row.date).slice(0,7);
+        if (!row.Steps) return; // Steps field holds the date/time in your JSON
+        let entryMonth = String(row.Steps).slice(0,7);
         if (entryMonth === month) {
-          let shortDate = String(row.date).split("T")[0];
+          let shortDate = String(row.Steps).split("T")[0];
           let tr = document.createElement("tr");
-          tr.innerHTML = `<td>${shortDate}</td><td>${row.steps}</td>`;
+          tr.innerHTML = `<td>${shortDate}</td><td>${row.Reward}</td>`;
           table.appendChild(tr);
 
-          totalSteps += parseInt(row.steps || 0);
-          totalStarsEarned += Math.floor((parseInt(row.steps || 0)) / 50);
+          totalSteps += parseInt(row.Reward || 0);
+          totalStarsEarned += Math.floor((parseInt(row.Reward || 0)) / 50);
 
-          if (row.reward && row.reward.includes("-star")) {
-            let rewardValue = parseInt(row.reward.split("-")[0]);
+          if (row.Reward && String(row.Reward).includes("-star")) {
+            let rewardValue = parseInt(row.Reward.split("-")[0]);
             totalRewardsUsed += rewardValue;
           }
         }
@@ -168,7 +165,7 @@
     }
 
     function loadStepsHistory() {
-      fetch("https://script.google.com/macros/s/AKfycbxOZrpewH4ZbKCM8U8hG5svJbDrq5jJV7OwMAqWyKZA6gVgze3L8B43pROaWhAZIpKB/exec")
+      fetch("https://script.google.com/macros/s/AKfycbyCg6MPxVydsaJyB5sAmdSRBKiCqgaHZIgQ1-Fl6lH8HriEmOrjNPUqEmD0MYlC7Tfe/exec")
         .then(response => response.json())
         .then(data => updateStepsHistory(data));
     }
@@ -195,4 +192,23 @@
         
         addHistory(`-${amount} stars redeemed on ${date}`);
         
-        saveData(date, 0, 0, amount + "-star reward", stars
+        saveData(date, 0, 0, amount + "-star reward", stars);
+        loadStepsHistory();
+      } else {
+        document.getElementById("rewardMessage").innerText = "Not enough stars!";
+      }
+    }
+
+    function saveData(date, steps, starsEarned, reward, balance) {
+      fetch("https://script.google.com/macros/s/AKfycbyCg6MPxVydsaJyB5sAmdSRBKiCqgaHZIgQ1-Fl6lH8HriEmOrjNPUqEmD0MYlC7Tfe/exec", {
+        method: "POST",
+        body: JSON.stringify({ date: date, steps: steps, stars: starsEarned, reward: reward, balance: balance })
+      })
+      .then(response => response.text())
+      .then(data => console.log(data));
+    }
+
+    window.onload = loadStepsHistory;
+  </script>
+</body>
+</html>
