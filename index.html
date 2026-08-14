@@ -138,19 +138,19 @@
       let month = new Date().toISOString().slice(0,7);
 
       data.forEach(row => {
-        if (!row.Date) return;
-        let entryMonth = String(row.Date).slice(0,7);
+        if (!row.Steps) return;
+        let entryMonth = String(row.Steps).slice(0,7);
         if (entryMonth === month) {
-          let shortDate = String(row.Date).split("T")[0];
+          let shortDate = String(row.Steps).split("T")[0]; // Steps holds the date
           let tr = document.createElement("tr");
-          tr.innerHTML = `<td>${shortDate}</td><td>${row.Steps}</td>`;
+          tr.innerHTML = `<td>${shortDate}</td><td>${row.StarEarned}</td>`; // StarEarned holds step count
           table.appendChild(tr);
 
-          totalSteps += parseInt(row.Steps || 0);
-          totalStarsEarned += parseInt(row.StarEarned || 0);
+          totalSteps += parseInt(row.StarEarned || 0);   // sum steps
+          totalStarsEarned += parseInt(row.Reward || 0); // sum stars earned
 
-          if (row.Reward && row.Reward.includes("-star")) {
-            let rewardValue = parseInt(row.Reward.split("-")[0]);
+          if (row.Balance && row.Balance.includes("-star")) {
+            let rewardValue = parseInt(row.Balance.split("-")[0]);
             totalRewardsUsed += rewardValue;
           }
         }
