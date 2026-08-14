@@ -13,7 +13,7 @@
       background-color: #f9f9f9;
       border-radius: 8px;
       width: 250px;
-      margin-bottom: 30px; /* space below balance */
+      margin-bottom: 30px;
     }
     #history, #stepsHistory {
       margin-top: 20px;
@@ -29,8 +29,8 @@
     table { width: 100%; border-collapse: collapse; margin-top: 10px; }
     th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
     th { background-color: #eee; }
-    tr:nth-child(even) { background-color: #ffe6f0; } /* pastel pink */
-    tr:nth-child(odd) { background-color: #e6f0ff; } /* pastel blue */
+    tr:nth-child(even) { background-color: #ffe6f0; }
+    tr:nth-child(odd) { background-color: #e6f0ff; }
     .reward-grid {
       display: flex;
       justify-content: center;
@@ -64,26 +64,22 @@
 <body>
   <h1>⭐ Step to Star Tracker ⭐</h1>
   
-  <!-- Date picker -->
   <div class="box">
     <label>Select date:</label>
     <input type="date" id="dateInput">
   </div>
   
-  <!-- Steps input -->
   <div class="box">
     <label>Enter steps:</label>
     <input type="number" id="stepsInput">
     <button onclick="convertSteps()">Convert to Stars</button>
   </div>
   
-  <!-- Star Balance Box -->
   <div class="balance-box">
     <h2>🌟 Star Balance</h2>
     <p id="stars">0</p>
   </div>
   
-  <!-- Rewards grid -->
   <div class="reward-grid">
     <div class="reward-box" onclick="redeemReward(100)">
       <div class="emoji">✏️</div>
@@ -109,13 +105,11 @@
   
   <p id="rewardMessage"></p>
   
-  <!-- History log -->
   <div id="history">
     <h3>📜 Star History</h3>
     <div id="historyLog"></div>
   </div>
   
-  <!-- Steps history -->
   <div id="stepsHistory">
     <h3>🚶 Steps History (This Month)</h3>
     <div id="stepsLog"></div>
@@ -144,7 +138,7 @@
       let totalSteps = 0;
       let totalStarsEarned = 0;
       let totalRewardsUsed = 0;
-      let month = new Date().toISOString().slice(0,7); // YYYY-MM
+      let month = new Date().toISOString().slice(0,7);
 
       data.forEach(row => {
         if (!row.date) return;
@@ -156,7 +150,7 @@
           table.appendChild(tr);
 
           totalSteps += parseInt(row.steps || 0);
-          totalStarsEarned += parseInt(row.stars || 0);
+          totalStarsEarned += Math.floor((parseInt(row.steps || 0)) / 50);
 
           if (row.reward && row.reward.includes("-star")) {
             let rewardValue = parseInt(row.reward.split("-")[0]);
@@ -168,14 +162,13 @@
       stepsLog.appendChild(table);
       document.getElementById("stepsTotal").textContent = `Total: ${totalSteps} steps`;
 
-      // ✅ Net balance = stars earned - rewards used
       let netBalance = totalStarsEarned - totalRewardsUsed;
       document.getElementById("stars").innerText = netBalance;
-      stars = netBalance; // keep JS variable in sync
+      stars = netBalance;
     }
 
     function loadStepsHistory() {
-      fetch("https://script.google.com/macros/s/AKfycbyKI6rxaQgMs8P9muLVwy8QsNSouyJLBON0Ef6Nyuwpsss23SNd6lWZjU2L4YaZCuu_/exec")
+      fetch("https://script.google.com/macros/s/AKfycbxOZrpewH4ZbKCM8U8hG5svJbDrq5jJV7OwMAqWyKZA6gVgze3L8B43pROaWhAZIpKB/exec")
         .then(response => response.json())
         .then(data => updateStepsHistory(data));
     }
@@ -202,23 +195,4 @@
         
         addHistory(`-${amount} stars redeemed on ${date}`);
         
-        saveData(date, 0, 0, amount + "-star reward", stars);
-        loadStepsHistory();
-      } else {
-        document.getElementById("rewardMessage").innerText = "Not enough stars!";
-      }
-    }
-
-    function saveData(date, steps, starsEarned, reward, balance) {
-      fetch("https://script.google.com/macros/s/AKfycbyKI6rxaQgMs8P9muLVwy8QsNSouyJLBON0Ef6Nyuwpsss23SNd6lWZjU2L4YaZCuu_/exec", {
-        method: "POST",
-        body: JSON.stringify({ date: date, steps: steps, stars: starsEarned, reward: reward, balance: balance })
-      })
-      .then(response => response.text())
-      .then(data => console.log(data));
-    }
-
-    window.onload = loadStepsHistory;
-  </script>
-</body>
-</html>
+        saveData(date, 0, 0, amount + "-star reward", stars
