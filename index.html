@@ -17,7 +17,7 @@
       return;
     }
 
-    // ✅ skip the first row (header row)
+    // ✅ skip header row
     const rows = data.slice(1);
 
     let table = document.createElement("table");
@@ -28,45 +28,31 @@
     let totalSteps = 0;
     let totalStars = 0;
 
-    // track latest balance from the last row
+    // ✅ latest balance from last row
     let latestBalance = parseInt(rows[rows.length - 1].balance || 0);
 
-    const grouped = {};
     rows.forEach(row => {
-      const dateRaw = row.date;
+      let date = row.date;
+      if (date && date.includes("T")) {
+        date = date.split("T")[0]; // strip time
+      }
+
       const steps = parseInt(row.steps || 0);
       const starsEarned = parseInt(row.stars || 0);
       const reward = row.reward || "";
 
-      // format date to YYYY-MM-DD only
-      let date = dateRaw;
-      if (dateRaw && dateRaw.includes("T")) {
-        date = dateRaw.split("T")[0];
-      }
-
-      if (date) {
-        if (!grouped[date]) {
-          grouped[date] = { steps: 0, stars: 0, rewards: [] };
-        }
-        grouped[date].steps += steps;
-        grouped[date].stars += starsEarned;
-        if (reward) grouped[date].rewards.push(reward);
-      }
-    });
-
-    for (const date in grouped) {
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>${date}</td>
-        <td>${grouped[date].steps}</td>
-        <td>${grouped[date].stars}</td>
-        <td>${grouped[date].rewards.join(", ")}</td>
+        <td>${steps}</td>
+        <td>${starsEarned}</td>
+        <td>${reward}</td>
       `;
       table.appendChild(tr);
 
-      totalSteps += grouped[date].steps;
-      totalStars += grouped[date].stars;
-    }
+      totalSteps += steps;
+      totalStars += starsEarned;
+    });
 
     stepsLog.appendChild(table);
     document.getElementById("stepsTotal").textContent = `Total: ${totalSteps} steps, ${totalStars} stars earned`;
