@@ -13,7 +13,7 @@
       background-color: #f9f9f9;
       border-radius: 8px;
       width: 250px;
-      margin-bottom: 30px; /* extra space below balance */
+      margin-bottom: 30px; /* space below balance */
     }
     #history, #stepsHistory {
       margin-top: 20px;
@@ -141,7 +141,9 @@
       header.innerHTML = "<th>Date</th><th>Steps</th>";
       table.appendChild(header);
 
-      let total = 0;
+      let totalSteps = 0;
+      let totalStarsEarned = 0;
+      let totalRewardsUsed = 0;
       let month = new Date().toISOString().slice(0,7); // YYYY-MM
 
       data.forEach(row => {
@@ -152,16 +154,28 @@
           let tr = document.createElement("tr");
           tr.innerHTML = `<td>${shortDate}</td><td>${row.steps}</td>`;
           table.appendChild(tr);
-          total += parseInt(row.steps || 0);
+
+          totalSteps += parseInt(row.steps || 0);
+          totalStarsEarned += parseInt(row.stars || 0);
+
+          if (row.reward && row.reward.includes("-star")) {
+            let rewardValue = parseInt(row.reward.split("-")[0]);
+            totalRewardsUsed += rewardValue;
+          }
         }
       });
 
       stepsLog.appendChild(table);
-      document.getElementById("stepsTotal").textContent = `Total: ${total} steps`;
+      document.getElementById("stepsTotal").textContent = `Total: ${totalSteps} steps`;
+
+      // ✅ Net balance = stars earned - rewards used
+      let netBalance = totalStarsEarned - totalRewardsUsed;
+      document.getElementById("stars").innerText = netBalance;
+      stars = netBalance; // keep JS variable in sync
     }
 
     function loadStepsHistory() {
-      fetch("https://script.google.com/macros/s/AKfycbxslnBBUyS61HPGg7IXIKMFCVeDO9Rj3DE-Yv4KcnxqlDt_Y0u9U21CQYelyTtA6mF7/exec")
+      fetch("https://script.google.com/macros/s/AKfycbyKI6rxaQgMs8P9muLVwy8QsNSouyJLBON0Ef6Nyuwpsss23SNd6lWZjU2L4YaZCuu_/exec")
         .then(response => response.json())
         .then(data => updateStepsHistory(data));
     }
@@ -196,7 +210,7 @@
     }
 
     function saveData(date, steps, starsEarned, reward, balance) {
-      fetch("https://script.google.com/macros/s/AKfycbxslnBBUyS61HPGg7IXIKMFCVeDO9Rj3DE-Yv4KcnxqlDt_Y0u9U21CQYelyTtA6mF7/exec", {
+      fetch("https://script.google.com/macros/s/AKfycbyKI6rxaQgMs8P9muLVwy8QsNSouyJLBON0Ef6Nyuwpsss23SNd6lWZjU2L4YaZCuu_/exec", {
         method: "POST",
         body: JSON.stringify({ date: date, steps: steps, stars: starsEarned, reward: reward, balance: balance })
       })
