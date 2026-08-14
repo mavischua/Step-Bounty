@@ -3,7 +3,7 @@
 <head>
   <title>Step to Star Tracker</title>
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+    body { font-family: Arial, sans-serif; text-align: center; margin-top: 30px; }
     .box { margin: 20px; }
     .balance-box {
       border: 2px solid #444;
@@ -12,6 +12,20 @@
       margin-top: 20px;
       background-color: #f9f9f9;
       border-radius: 8px;
+      width: 250px;
+    }
+    #history {
+      margin-top: 20px;
+      text-align: left;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+      border-top: 1px solid #ccc;
+      padding-top: 10px;
+    }
+    #history p {
+      margin: 5px 0;
+      font-size: 14px;
     }
   </style>
 </head>
@@ -45,8 +59,21 @@
     <p id="rewardMessage"></p>
   </div>
   
+  <!-- History log -->
+  <div id="history">
+    <h3>📜 History</h3>
+    <div id="historyLog"></div>
+  </div>
+  
   <script>
     let stars = 0;
+
+    function addHistory(message) {
+      let log = document.getElementById("historyLog");
+      let entry = document.createElement("p");
+      entry.textContent = message;
+      log.prepend(entry); // newest entry at top
+    }
 
     function convertSteps() {
       let steps = document.getElementById("stepsInput").value;
@@ -54,6 +81,8 @@
       let earned = Math.floor(steps / 50); // 1 star per 50 steps
       stars += earned;
       document.getElementById("stars").innerText = stars;
+      
+      addHistory(`+${earned} stars from ${steps} steps on ${date}`);
       
       // Save to Google Sheet
       saveData(date, steps, earned, "", stars);
@@ -65,6 +94,8 @@
         stars -= amount;
         document.getElementById("stars").innerText = stars;
         document.getElementById("rewardMessage").innerText = "🎉 You redeemed a " + amount + "-star reward!";
+        
+        addHistory(`-${amount} stars redeemed on ${date}`);
         
         // Save redemption to Google Sheet
         saveData(date, 0, 0, amount + "-star reward", stars);
