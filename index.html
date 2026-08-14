@@ -143,11 +143,17 @@
 
       const grouped = {};
       data.forEach(row => {
-        const date = row.date;
+        const dateRaw = row.date;
         const steps = parseInt(row.steps || 0);
         const starsEarned = parseInt(row.stars || 0);
         const reward = row.reward || "";
         const balance = parseInt(row.balance || 0);
+
+        // Format date to YYYY-MM-DD only
+        let date = dateRaw;
+        if (dateRaw && dateRaw.includes("T")) {
+          date = dateRaw.split("T")[0];
+        }
 
         if (date && date !== "Date ") { // skip header row accidentally included
           if (!grouped[date]) {
@@ -217,10 +223,3 @@
         
         saveData(date, 0, 0, amount + "-star reward", stars);
         loadStepsHistory();
-      } else {
-        document.getElementById("rewardMessage").innerText = "Not enough stars!";
-      }
-    }
-
-    function saveData(date, steps, starsEarned, reward, balance) {
-      fetch("https://script.google.com/macros/s/AKfycbxxDgztKv_DXSLBtJGksfxoyvykHB5SyCblq7QYmUZdzfmOHZAAR
