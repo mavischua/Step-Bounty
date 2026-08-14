@@ -139,6 +139,7 @@
 
       let totalSteps = 0;
       let totalStars = 0;
+      let latestBalance = 0;
 
       const grouped = {};
       data.forEach(row => {
@@ -146,6 +147,7 @@
         const steps = parseInt(row.steps || 0);
         const starsEarned = parseInt(row.stars || 0);
         const reward = row.reward || "";
+        const balance = parseInt(row.balance || 0);
 
         if (date && date !== "Date ") { // skip header row accidentally included
           if (!grouped[date]) {
@@ -154,6 +156,11 @@
           grouped[date].steps += steps;
           grouped[date].stars += starsEarned;
           if (reward) grouped[date].rewards.push(reward);
+        }
+
+        // track latest balance (last non-empty row)
+        if (!isNaN(balance)) {
+          latestBalance = balance;
         }
       });
 
@@ -173,6 +180,10 @@
 
       stepsLog.appendChild(table);
       document.getElementById("stepsTotal").textContent = `Total: ${totalSteps} steps, ${totalStars} stars earned`;
+
+      // update star balance box
+      document.getElementById("stars").innerText = latestBalance;
+      stars = latestBalance;
     }
 
     function loadStepsHistory() {
@@ -212,15 +223,4 @@
     }
 
     function saveData(date, steps, starsEarned, reward, balance) {
-      fetch("https://script.google.com/macros/s/AKfycbxxDgztKv_DXSLBtJGksfxoyvykHB5SyCblq7QYmUZdzfmOHZAAROBgpWdvwvrkzeny/exec", {
-        method: "POST",
-        body: JSON.stringify({ date: date, steps: steps, stars: starsEarned, reward: reward, balance: balance })
-      })
-      .then(response => response.text())
-      .then(data => console.log(data));
-    }
-
-    window.onload = loadStepsHistory;
-  </script>
-</body>
-</html>
+      fetch("https://script.google.com/macros/s/AKfycbxxDgztKv_DXSLBtJGksfxoyvykHB5SyCblq7QYmUZdzfmOHZAAR
