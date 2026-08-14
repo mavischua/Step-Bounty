@@ -42,4 +42,22 @@
       if (stars >= amount) {
         stars -= amount;
         document.getElementById("stars").innerText = stars;
-        document.getElement
+        document.getElementById("rewardMessage").innerText = "🎉 You redeemed a " + amount + "-star reward!";
+        
+        // Save redemption to Google Sheet
+        saveData(0, 0, amount + "-star reward", stars);
+      } else {
+        document.getElementById("rewardMessage").innerText = "Not enough stars!";
+      }
+    }
+    function saveData(steps, starsEarned, reward, balance) {
+      fetch("https://script.google.com/macros/s/AKfycbzewkJdIpcMdxeRLyyd7rjj10a-39_M2f8r0n14_rYYMe9n97H6xq_olUkzmL1sgGPM/exec", {
+        method: "POST",
+        body: JSON.stringify({ steps: steps, stars: starsEarned, reward: reward, balance: balance })
+      })
+      .then(response => response.text())
+      .then(data => console.log(data));
+    }
+  </script>
+</body>
+</html>
