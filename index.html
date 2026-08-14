@@ -5,6 +5,14 @@
   <style>
     body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
     .box { margin: 20px; }
+    .balance-box {
+      border: 2px solid #444;
+      display: inline-block;
+      padding: 15px;
+      margin-top: 20px;
+      background-color: #f9f9f9;
+      border-radius: 8px;
+    }
   </style>
 </head>
 <body>
@@ -23,9 +31,10 @@
     <button onclick="convertSteps()">Convert to Stars</button>
   </div>
   
-  <!-- Stars display -->
-  <div class="box">
-    <h2>My Stars: <span id="stars">0</span></h2>
+  <!-- Star Balance Box -->
+  <div class="balance-box">
+    <h2>🌟 Star Balance</h2>
+    <p id="stars">0</p>
   </div>
   
   <!-- Rewards -->
