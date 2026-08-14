@@ -90,17 +90,22 @@
     let stars = 0;
 
     function updateStarBalance(data) {
+      const starsBox = document.getElementById("stars");
+      if (!starsBox) return;
+
       if (!Array.isArray(data) || data.length <= 1) {
-        document.getElementById("stars").innerText = 0;
+        starsBox.innerText = 0;
         return;
       }
+
       // skip header row
       const rows = data.slice(1);
       // latest balance from last row
       let latestBalance = parseInt(rows[rows.length - 1].balance || 0);
-      document.getElementById("stars").innerText = latestBalance;
+
+      starsBox.innerText = latestBalance;
       stars = latestBalance;
-      console.log("Latest balance:", latestBalance); // debug
+      console.log("Latest balance:", latestBalance);
     }
 
     function loadStarBalance() {
