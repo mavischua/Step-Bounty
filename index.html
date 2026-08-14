@@ -13,6 +13,7 @@
       background-color: #f9f9f9;
       border-radius: 8px;
       width: 250px;
+      margin-bottom: 30px; /* extra space below balance */
     }
     #history, #stepsHistory {
       margin-top: 20px;
@@ -30,14 +31,34 @@
     th { background-color: #eee; }
     tr:nth-child(even) { background-color: #ffe6f0; } /* pastel pink */
     tr:nth-child(odd) { background-color: #e6f0ff; } /* pastel blue */
-    .reward-images {
+    .reward-grid {
       display: flex;
       justify-content: center;
       gap: 20px;
       flex-wrap: wrap;
       margin-bottom: 15px;
     }
-    .reward-images div { text-align: center; width: 120px; font-size: 20px; }
+    .reward-box {
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      width: 120px;
+      padding: 15px;
+      background-color: #fdfdfd;
+      cursor: pointer;
+      transition: transform 0.2s, background-color 0.2s;
+    }
+    .reward-box:hover {
+      transform: scale(1.05);
+      background-color: #f0f8ff;
+    }
+    .reward-box .emoji {
+      font-size: 30px;
+      margin-bottom: 8px;
+    }
+    .reward-box p {
+      margin: 0;
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
@@ -62,24 +83,31 @@
     <p id="stars">0</p>
   </div>
   
-  <!-- Reward emojis -->
-  <div class="reward-images">
-    <div>✏️<br>100 ⭐ Stationery</div>
-    <div>🍫<br>200 ⭐ Chocolate</div>
-    <div>🧋<br>300 ⭐ Milk Tea</div>
-    <div>🍰<br>400 ⭐ Dessert</div>
-    <div>🍲<br>500 ⭐ Mala Xiang Guo</div>
+  <!-- Rewards grid -->
+  <div class="reward-grid">
+    <div class="reward-box" onclick="redeemReward(100)">
+      <div class="emoji">✏️</div>
+      <p>100 ⭐ Stationery</p>
+    </div>
+    <div class="reward-box" onclick="redeemReward(200)">
+      <div class="emoji">🍫</div>
+      <p>200 ⭐ Chocolate</p>
+    </div>
+    <div class="reward-box" onclick="redeemReward(300)">
+      <div class="emoji">🧋</div>
+      <p>300 ⭐ Milk Tea</p>
+    </div>
+    <div class="reward-box" onclick="redeemReward(400)">
+      <div class="emoji">🍰</div>
+      <p>400 ⭐ Dessert</p>
+    </div>
+    <div class="reward-box" onclick="redeemReward(500)">
+      <div class="emoji">🍲</div>
+      <p>500 ⭐ Mala Xiang Guo</p>
+    </div>
   </div>
   
-  <!-- Rewards -->
-  <div class="box">
-    <button onclick="redeemReward(100)">Redeem 100-Star Reward</button>
-    <button onclick="redeemReward(200)">Redeem 200-Star Reward</button>
-    <button onclick="redeemReward(300)">Redeem 300-Star Reward</button>
-    <button onclick="redeemReward(400)">Redeem 400-Star Reward</button>
-    <button onclick="redeemReward(500)">Redeem 500-Star Reward</button>
-    <p id="rewardMessage"></p>
-  </div>
+  <p id="rewardMessage"></p>
   
   <!-- History log -->
   <div id="history">
