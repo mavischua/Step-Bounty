@@ -138,18 +138,18 @@
       let month = new Date().toISOString().slice(0,7);
 
       data.forEach(row => {
-        if (!row.Steps) return; // Steps field holds the date/time in your JSON
-        let entryMonth = String(row.Steps).slice(0,7);
+        if (!row.Date) return;
+        let entryMonth = String(row.Date).slice(0,7);
         if (entryMonth === month) {
-          let shortDate = String(row.Steps).split("T")[0];
+          let shortDate = String(row.Date).split("T")[0];
           let tr = document.createElement("tr");
-          tr.innerHTML = `<td>${shortDate}</td><td>${row.Reward}</td>`;
+          tr.innerHTML = `<td>${shortDate}</td><td>${row.Steps}</td>`;
           table.appendChild(tr);
 
-          totalSteps += parseInt(row.Reward || 0);
-          totalStarsEarned += Math.floor((parseInt(row.Reward || 0)) / 50);
+          totalSteps += parseInt(row.Steps || 0);
+          totalStarsEarned += parseInt(row.StarEarned || 0);
 
-          if (row.Reward && String(row.Reward).includes("-star")) {
+          if (row.Reward && row.Reward.includes("-star")) {
             let rewardValue = parseInt(row.Reward.split("-")[0]);
             totalRewardsUsed += rewardValue;
           }
@@ -165,7 +165,7 @@
     }
 
     function loadStepsHistory() {
-      fetch("https://script.google.com/macros/s/AKfycbyCg6MPxVydsaJyB5sAmdSRBKiCqgaHZIgQ1-Fl6lH8HriEmOrjNPUqEmD0MYlC7Tfe/exec")
+      fetch("https://script.google.com/macros/s/AKfycbyNGCe4ldzNAPgDnuNekVG0_QtrNtYppB7_e78rRyQbLgggj6vZKgwVeesySVJrAJWN/exec")
         .then(response => response.json())
         .then(data => updateStepsHistory(data));
     }
@@ -200,7 +200,7 @@
     }
 
     function saveData(date, steps, starsEarned, reward, balance) {
-      fetch("https://script.google.com/macros/s/AKfycbyCg6MPxVydsaJyB5sAmdSRBKiCqgaHZIgQ1-Fl6lH8HriEmOrjNPUqEmD0MYlC7Tfe/exec", {
+      fetch("https://script.google.com/macros/s/AKfycbyNGCe4ldzNAPgDnuNekVG0_QtrNtYppB7_e78rRyQbLgggj6vZKgwVeesySVJrAJWN/exec", {
         method: "POST",
         body: JSON.stringify({ date: date, steps: steps, stars: starsEarned, reward: reward, balance: balance })
       })
