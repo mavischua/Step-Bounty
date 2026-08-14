@@ -17,19 +17,38 @@
     #history, #stepsHistory {
       margin-top: 20px;
       text-align: left;
-      max-width: 400px;
+      max-width: 500px;
       margin-left: auto;
       margin-right: auto;
       border-top: 1px solid #ccc;
       padding-top: 10px;
     }
-    #history p, #stepsHistory p {
+    #history p {
       margin: 5px 0;
       font-size: 14px;
     }
     #stepsTotal {
       font-weight: bold;
       margin-top: 10px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background-color: #eee;
+    }
+    tr:nth-child(even) {
+      background-color: #ffe6f0; /* pastel pink */
+    }
+    tr:nth-child(odd) {
+      background-color: #e6f0ff; /* pastel blue */
     }
   </style>
 </head>
@@ -89,19 +108,27 @@
     function updateStepsHistory(data) {
       let stepsLog = document.getElementById("stepsLog");
       stepsLog.innerHTML = "";
+
+      let table = document.createElement("table");
+      let header = document.createElement("tr");
+      header.innerHTML = "<th>Date</th><th>Steps</th>";
+      table.appendChild(header);
+
       let total = 0;
       let month = new Date().toISOString().slice(0,7); // YYYY-MM
 
       data.forEach(row => {
         let entryMonth = String(row.date).slice(0,7);
         if (entryMonth === month) {
-          let entry = document.createElement("p");
-          entry.textContent = `${row.date}: ${row.steps} steps`;
-          stepsLog.prepend(entry);
+          let shortDate = String(row.date).split("T")[0]; // remove time if present
+          let tr = document.createElement("tr");
+          tr.innerHTML = `<td>${shortDate}</td><td>${row.steps}</td>`;
+          table.appendChild(tr);
           total += parseInt(row.steps || 0);
         }
       });
 
+      stepsLog.appendChild(table);
       document.getElementById("stepsTotal").textContent = `Total: ${total} steps`;
     }
 
