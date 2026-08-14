@@ -1,43 +1,155 @@
-function doPost(e) {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("steps");
-  var data = JSON.parse(e.postData.contents);
-
-  sheet.appendRow([
-    "",                      // Column A blank
-    data.date || new Date(), // Column B: Date
-    data.steps,              // Column C: Steps
-    data.stars,              // Column D: Star Earned
-    data.reward,             // Column E: Rewards redeemed
-    data.balance             // Column F: Star balance
-  ]);
-
-  return ContentService.createTextOutput("Success");
-}
-
-function doGet(e) {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("steps");
-  var data = sheet.getDataRange().getValues();
-  
-  var result = [];
-  for (var i = 1; i < data.length; i++) { // skip header row
-    let rawDate = data[i][1];
-    let dateStr;
-    if (rawDate instanceof Date) {
-      // Normalize to yyyy-MM-dd
-      dateStr = Utilities.formatDate(rawDate, Session.getScriptTimeZone(), "yyyy-MM-dd");
-    } else {
-      dateStr = rawDate;
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Step to Star Tracker</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin-top: 30px; }
+    .box { margin: 20px; }
+    .balance-box {
+      border: 2px solid #444;
+      display: inline-block;
+      padding: 15px;
+      margin-top: 20px;
+      background-color: #f9f9f9;
+      border-radius: 8px;
+      width: 250px;
     }
-    
-    result.push({
-      date: dateStr,       // always a clean string now
-      steps: data[i][2],
-      stars: data[i][3],
-      reward: data[i][4],
-      balance: data[i][5]
-    });
-  }
+    #history, #stepsHistory {
+      margin-top: 20px;
+      text-align: left;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+      border-top: 1px solid #ccc;
+      padding-top: 10px;
+    }
+    #history p, #stepsHistory p {
+      margin: 5px 0;
+      font-size: 14px;
+    }
+    #stepsTotal {
+      font-weight: bold;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>⭐ Step to Star Tracker ⭐</h1>
   
-  return ContentService.createTextOutput(JSON.stringify(result))
-    .setMimeType(ContentService.MimeType.JSON);
-}
+  <!-- Date picker -->
+  <div class="box">
+    <label>Select date:</label>
+    <input type="date" id="dateInput">
+  </div>
+  
+  <!-- Steps input -->
+  <div class="box">
+    <label>Enter steps:</label>
+    <input type="number" id="stepsInput">
+    <button onclick="convertSteps()">Convert to Stars</button>
+  </div>
+  
+  <!-- Star Balance Box -->
+  <div class="balance-box">
+    <h2>🌟 Star Balance</h2>
+    <p id="stars">0</p>
+  </div>
+  
+  <!-- Rewards -->
+  <div class="box">
+    <button onclick="redeemReward(100)">Redeem 100-Star Reward</button>
+    <button onclick="redeemReward(200)">Redeem 200-Star Reward</button>
+    <button onclick="redeemReward(500)">Redeem 500-Star Reward</button>
+    <p id="rewardMessage"></p>
+  </div>
+  
+  <!-- History log -->
+  <div id="history">
+    <h3>📜 Star History</h3>
+    <div id="historyLog"></div>
+  </div>
+  
+  <!-- Steps history -->
+  <div id="stepsHistory">
+    <h3>🚶 Steps History (This Month)</h3>
+    <div id="stepsLog"></div>
+    <p id="stepsTotal">Total: 0 steps</p>
+  </div>
+  
+  <script>
+    let stars = 0;
+
+    function addHistory(message) {
+      let log = document.getElementById("historyLog");
+      let entry = document.createElement("p");
+      entry.textContent = message;
+      log.prepend(entry);
+    }
+
+    function updateStepsHistory(data) {
+      let stepsLog = document.getElementById("stepsLog");
+      stepsLog.innerHTML = "";
+      let total = 0;
+      let month = new Date().toISOString().slice(0,7); // YYYY-MM
+
+      data.forEach(row => {
+        let entryMonth = String(row.date).slice(0,7);
+        if (entryMonth === month) {
+          let entry = document.createElement("p");
+          entry.textContent = `${row.date}: ${row.steps} steps`;
+          stepsLog.prepend(entry);
+          total += parseInt(row.steps || 0);
+        }
+      });
+
+      document.getElementById("stepsTotal").textContent = `Total: ${total} steps`;
+    }
+
+    function loadStepsHistory() {
+      fetch("https://script.google.com/macros/s/AKfycbyq8V68VAk2I3uSXk5wvTj8sxC-PHnpV5C2sIsxqmq2FcxGRAKtxSv9VR6Ew7mqgNY3/exec")
+        .then(response => response.json())
+        .then(data => updateStepsHistory(data));
+    }
+
+    function convertSteps() {
+      let steps = document.getElementById("stepsInput").value;
+      let date = document.getElementById("dateInput").value || new Date().toISOString().split("T")[0];
+      let earned = Math.floor(steps / 50);
+      stars += earned;
+      document.getElementById("stars").innerText = stars;
+      
+      addHistory(`+${earned} stars from ${steps} steps on ${date}`);
+      
+      saveData(date, steps, earned, "", stars);
+      loadStepsHistory();
+    }
+
+    function redeemReward(amount) {
+      let date = document.getElementById("dateInput").value || new Date().toISOString().split("T")[0];
+      if (stars >= amount) {
+        stars -= amount;
+        document.getElementById("stars").innerText = stars;
+        document.getElementById("rewardMessage").innerText = "🎉 You redeemed a " + amount + "-star reward!";
+        
+        addHistory(`-${amount} stars redeemed on ${date}`);
+        
+        saveData(date, 0, 0, amount + "-star reward", stars);
+        loadStepsHistory();
+      } else {
+        document.getElementById("rewardMessage").innerText = "Not enough stars!";
+      }
+    }
+
+    function saveData(date, steps, starsEarned, reward, balance) {
+      fetch("https://script.google.com/macros/s/AKfycbyq8V68VAk2I3uSXk5wvTj8sxC-PHnpV5C2sIsxqmq2FcxGRAKtxSv9VR6Ew7mqgNY3/exec", {
+        method: "POST",
+        body: JSON.stringify({ date: date, steps: steps, stars: starsEarned, reward: reward, balance: balance })
+      })
+      .then(response => response.text())
+      .then(data => console.log(data));
+    }
+
+    window.onload = loadStepsHistory;
+  </script>
+</body>
+</html>
